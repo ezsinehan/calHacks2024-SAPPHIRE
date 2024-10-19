@@ -25,21 +25,46 @@ struct CircularToggleStyle: ToggleStyle {
     }
 }
 
-struct ToggleButtonView: View {
-    @Binding var isScreenProctoringEnabled: Bool
+struct FinishTaskView: View {
+    @Binding var isTaskStarted: Bool
     @Binding var isGazeTrackingEnabled: Bool
+    @Binding var isScreenProctoringEnabled: Bool
+    @Binding var isTaskCompleted: Bool
+    @Binding var isTaskSelected: Bool
+    @Binding var task: String
+    @ObservedObject var screenProctoring: ScreenProctoring // We need this to stop screen proctoring
 
     var body: some View {
-        VStack(spacing: 15) {
-            Text("How Should We Keep You On Task?")
+        VStack {
+            Text(task)
                 .font(.title2)
+            Button(action: {
+                // Stop screen proctoring and gaze tracking if enabled
+                if isScreenProctoringEnabled {
+                    screenProctoring.stopScreenProctoring()
+                }
+                isScreenProctoringEnabled = false
+                isGazeTrackingEnabled = false
 
-            Toggle("Proctor My Screen", isOn: $isScreenProctoringEnabled)
-                .toggleStyle(CircularToggleStyle())
-
-            Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
-                .toggleStyle(CircularToggleStyle())
+                // Reset the task-related states to go back to the task entry page
+                isTaskStarted = false
+                isTaskSelected = false
+                task = ""
+                
+                print("Task finished!")
+            }) {
+                Text("Finish Task")
+                    .font(.headline)
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 10)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 3)
+            }.buttonStyle(PlainButtonStyle())
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity) // Fill the screen
+        //.background(Color.black) // Change background color if needed
     }
 }
 
@@ -49,96 +74,107 @@ struct ContentView: View {
     @State private var isTaskStarted: Bool = false
     @State private var isScreenProctoringEnabled: Bool = false
     @State private var isGazeTrackingEnabled: Bool = false
-
+    @State private var isTaskCompleted: Bool = false
     @ObservedObject var screenProctoring = ScreenProctoring()
 
     var body: some View {
-        VStack {
-            if !isTaskSelected {
-                Text("Enter your task")
-                    .font(.title)
-                    .padding()
+        // Check if task is started or not to simulate navigation
+        if isTaskStarted {
+            FinishTaskView(isTaskStarted: $isTaskStarted,
+                           isGazeTrackingEnabled: $isGazeTrackingEnabled,
+                           isScreenProctoringEnabled: $isScreenProctoringEnabled,
+                           isTaskCompleted: $isTaskCompleted,
+                           isTaskSelected: $isTaskSelected,
+                           task: $task,
+                           screenProctoring: screenProctoring) // Pass screenProctoring to stop it
+        } else {
+            VStack {
+                if !isTaskSelected {
+                    Text("What would you like to do?")
+                        .font(.title2.bold())
+                        .padding()
+                    TextField("Enter your task here", text: $task)
+                        .frame(width: 450)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
 
-                TextField("Enter your task here", text: $task)
-                    .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Button(action: {
+                        isTaskSelected = true
+                    }) {
+                        Text("Next")
+                            .font(.headline)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 3)
+                            .padding(5)
+                    }.buttonStyle(PlainButtonStyle())
+                } else {
+                    Text("How Should We Keep You On Task?")
+                        .font(.title2)
+                        .padding()
 
-                Button(action: {
-                    isTaskSelected = true
-                }) {
-                    Text("Next")
-                        .font(.headline)
-                        .padding(.vertical, 5)
-                        .padding(.horizontal,10)
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .shadow(radius: 3)
-            }.buttonStyle(PlainButtonStyle())
-            } else {
-                Text("How Should We Keep You On Task?")
-                    .font(.title2)
-                    .padding()
+                    HStack {
+                        Toggle("Proctor My Screen", isOn: $isScreenProctoringEnabled)
+                            .toggleStyle(CircularToggleStyle())
+                            .onChange(of: isScreenProctoringEnabled) {
+                                
+                            }
+                        Text("Proctor My Screen")
+                            .font(.headline)
+                            .foregroundColor(isScreenProctoringEnabled ? .green : .gray)
+                    }
 
-                // Shnoz changed buttons to toggle
-                HStack{
-                    Toggle("Proctor My Screen", isOn: $isScreenProctoringEnabled)
-                        .toggleStyle(CircularToggleStyle())
-                        .onChange(of: isScreenProctoringEnabled) {
+                    HStack {
+                        Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
+                            .toggleStyle(CircularToggleStyle())
+                        Text("Track My Gaze")
+                            .font(.headline)
+                            .foregroundColor(isGazeTrackingEnabled ? .green : .gray)
+                    }
+                    .padding(5)
+
+                    if isScreenProctoringEnabled || isGazeTrackingEnabled {
+                        Button(action: {
+                            isTaskStarted = true
                             if isScreenProctoringEnabled {
                                 screenProctoring.startScreenProctoring(task: task)
-                                
                             } else {
                                 screenProctoring.stopScreenProctoring()
                             }
-                        }
-                    Text("Proctor My Screen")
-                        .font(.headline)
-                        .foregroundColor(isScreenProctoringEnabled ? .green : .gray)
-                }
-
-                // shnoz changed to toggle
-                HStack{
-                    Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
-                        .toggleStyle(CircularToggleStyle())
-                    Text("Track My Gaze")
-                        .font(.headline)
-                        .foregroundColor(isGazeTrackingEnabled ? .green : .gray)
-                }
-                if isScreenProctoringEnabled || isGazeTrackingEnabled {
-                                    Button(action: {
-                                        isTaskStarted = true
-                                        print(task)
-                                    }) {
-                                        Text("Start Task")
-                                            .font(.headline)
-                                            .padding(.vertical, 5)
-                                            .padding(.horizontal,10)
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                            .shadow(radius: 3)
-                                    }.buttonStyle(PlainButtonStyle())
-                                }
-
-                                // Back button to go back to task input screen
-                                Button(action: {
-                                    isTaskSelected = false
-                                    isScreenProctoringEnabled = false
-                                    isGazeTrackingEnabled = false
-                                    task = ""
-                                }) {
-                                    Text("Change Task")
-                                        .font(.headline)
-                                        .padding(.vertical, 5)
-                                        .padding(.horizontal,10)
-                                        .background(Color.red)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                        .shadow(radius: 3)
-                                }.buttonStyle(PlainButtonStyle())
-                            }
-                        }
-                        
+                            print(task)
+                        }) {
+                            Text("Start Task")
+                                .font(.headline)
+                                .padding(.vertical, 5)
+                                .padding(.horizontal, 10)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                                .shadow(radius: 3)
+                        }.buttonStyle(PlainButtonStyle())
                     }
+
+                    // Back button to go back to task input screen
+                    Button(action: {
+                        isTaskSelected = false
+                        isScreenProctoringEnabled = false
+                        isGazeTrackingEnabled = false
+                        task = ""
+                    }) {
+                        Text("Change Task")
+                            .font(.headline)
+                            .padding(.vertical, 5)
+                            .padding(.horizontal, 10)
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .shadow(radius: 3)
+                    }.buttonStyle(PlainButtonStyle())
                 }
+            }
+            .padding()
+        }
+    }
+}
