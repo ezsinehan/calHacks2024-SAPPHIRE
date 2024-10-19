@@ -46,6 +46,7 @@ struct ToggleButtonView: View {
 struct ContentView: View {
     @State private var task: String = ""
     @State private var isTaskSelected: Bool = false
+    @State private var isTaskStarted: Bool = false
     @State private var isScreenProctoringEnabled: Bool = false
     @State private var isGazeTrackingEnabled: Bool = false
 
@@ -66,11 +67,14 @@ struct ContentView: View {
                     isTaskSelected = true
                 }) {
                     Text("Next")
-                        .padding()
+                        .font(.headline)
+                        .padding(.vertical, 5)
+                        .padding(.horizontal,10)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
-                }
+                        .shadow(radius: 3)
+            }.buttonStyle(PlainButtonStyle())
             } else {
                 Text("How Should We Keep You On Task?")
                     .font(.title2)
@@ -102,20 +106,39 @@ struct ContentView: View {
                         .foregroundColor(isGazeTrackingEnabled ? .green : .gray)
                 }
                 if isScreenProctoringEnabled || isGazeTrackingEnabled {
-                    Button(action: {
-                        // TBD: Start Task Logic
-                    }) {
-                        Text("Start Task")
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
+                                    Button(action: {
+                                        isTaskStarted = true
+                                        print(task)
+                                    }) {
+                                        Text("Start Task")
+                                            .font(.headline)
+                                            .padding(.vertical, 5)
+                                            .padding(.horizontal,10)
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(10)
+                                            .shadow(radius: 3)
+                                    }.buttonStyle(PlainButtonStyle())
+                                }
+
+                                // Back button to go back to task input screen
+                                Button(action: {
+                                    isTaskSelected = false
+                                    isScreenProctoringEnabled = false
+                                    isGazeTrackingEnabled = false
+                                    task = ""
+                                }) {
+                                    Text("Change Task")
+                                        .font(.headline)
+                                        .padding(.vertical, 5)
+                                        .padding(.horizontal,10)
+                                        .background(Color.red)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                        .shadow(radius: 3)
+                                }.buttonStyle(PlainButtonStyle())
+                            }
+                        }
+                        
                     }
                 }
-            }
-        }
-        .padding()
-    }
-}
-
-//
