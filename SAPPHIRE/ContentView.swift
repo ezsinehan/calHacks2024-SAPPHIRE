@@ -77,21 +77,8 @@ struct ContentView: View {
     @State private var isGazeTrackingEnabled: Bool = false
     @State private var isTaskCompleted: Bool = false
     @ObservedObject var screenProctoring = ScreenProctoring()
-    @ObservedObject var userFeedback = UserFeedback()
-
 
     var body: some View {
-
-        VStack {
-            Text(userFeedback.feedbackMessage)
-                .font(.title)
-                .padding()
-                .foregroundColor(userFeedback.feedbackColor)
-            
-            if !isTaskSelected {
-                Text("Enter your task")
-                    .font(.title)
-                    .padding()
         // Check if task is started or not to simulate navigation
         if isTaskStarted {
             FinishTaskView(isTaskStarted: $isTaskStarted,
@@ -110,7 +97,6 @@ struct ContentView: View {
                     TextField("Enter your task here", text: $task)
                         .frame(width: 450)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-
 
                     Button(action: {
                         isTaskSelected = true
@@ -154,61 +140,10 @@ struct ContentView: View {
                         Button(action: {
                             isTaskStarted = true
                             if isScreenProctoringEnabled {
-                                screenProctoring.userFeedback = userFeedback
                                 screenProctoring.startScreenProctoring(task: task)
                             } else {
                                 screenProctoring.stopScreenProctoring()
                             }
-
-                        }
-                    Text("Proctor My Screen")
-                        .font(.headline)
-                        .foregroundColor(isScreenProctoringEnabled ? .green : .gray)
-                }
-
-                // shnoz changed to toggle
-                HStack{
-                    Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
-                        .toggleStyle(CircularToggleStyle())
-                    Text("Track My Gaze")
-                        .font(.headline)
-                        .foregroundColor(isGazeTrackingEnabled ? .green : .gray)
-                }
-                if isScreenProctoringEnabled || isGazeTrackingEnabled {
-                                    Button(action: {
-                                        isTaskStarted = true
-                                        print(task)
-                                    }) {
-                                        Text("Start Task")
-                                            .font(.headline)
-                                            .padding(.vertical, 5)
-                                            .padding(.horizontal,10)
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(10)
-                                            .shadow(radius: 3)
-                                    }.buttonStyle(PlainButtonStyle())
-                                }
-
-                                // Back button to go back to task input screen
-                                Button(action: {
-                                    isTaskSelected = false
-                                    isScreenProctoringEnabled = false
-                                    isGazeTrackingEnabled = false
-                                    task = ""
-                                }) {
-                                    Text("Change Task")
-                                        .font(.headline)
-                                        .padding(.vertical, 5)
-                                        .padding(.horizontal,10)
-                                        .background(Color.red)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                        .shadow(radius: 3)
-                                }.buttonStyle(PlainButtonStyle())
-                            }
-                        }
-
                             print(task)
                         }) {
                             Text("Start Task")

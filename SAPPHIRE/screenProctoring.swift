@@ -14,8 +14,6 @@ class ScreenProctoring: ObservableObject {
     @Published var isProctoring = false
     var timer: Timer?
     
-    var userFeedback: UserFeedback?
-    
     func captureScreen() -> NSImage? {
         let displayId = CGMainDisplayID() //display id of main screen
         let imageRef = CGDisplayCreateImage(displayId) //capturing screen as image ref
@@ -53,10 +51,8 @@ class ScreenProctoring: ObservableObject {
                 print("User is on task: \(task)")
             } else {
                 print("User is off task! Recognized: \(joinedRecognizedText)")
+//                playAlertSound()  // Optional: Alert if off task
             }
-            
-            self.userFeedback?.provideFeedback(isOnTask: isOnTask, task: task)
-            
         }
         
         let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
@@ -65,7 +61,7 @@ class ScreenProctoring: ObservableObject {
     
     func startScreenProctoring(task: String) {
         isProctoring = true
-        timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { _ in
             if let screenshot = self.captureScreen() {
                 self.recognizeText(from: screenshot, task: task)
             }
