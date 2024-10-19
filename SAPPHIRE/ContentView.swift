@@ -42,6 +42,7 @@ struct FinishTaskView: View {
                 // Stop screen proctoring and gaze tracking if enabled
                 if isScreenProctoringEnabled {
                     screenProctoring.stopScreenProctoring()
+                    print("stopping screen proctoring") 
                 }
                 isScreenProctoringEnabled = false
                 isGazeTrackingEnabled = false
