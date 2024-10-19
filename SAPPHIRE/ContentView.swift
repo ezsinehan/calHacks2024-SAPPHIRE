@@ -4,57 +4,84 @@
 //
 //  Created by EZ on 10/18/24.
 //
-
 import SwiftUI
-import SwiftData
 
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var task: String=""
+    @State private var isTaskSelected: Bool = false
+    @State private var isScreenProctoringEnabled: Bool = false
+    @State private var isGazeTrackingEnabled: Bool = false
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+        VStack {
+            if !isTaskSelected {
+                Text("Enter your task")
+                    .font(.title)
+                    .padding()
+                
+                TextField("Enter your task here", text: $task)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                Button(action: {
+                    isTaskSelected = true
+                }) {
+                    Text("Next")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+        } else {
+            Text("How Should We Keep You On Task?")
+                .font(.title2)
+                .padding()
+            
+            VStack {
+                Button(action: {
+                    isScreenProctoringEnabled.toggle()
+                }) {
+                    Text("Proctor My Screen")
+                        .padding()
+                        .background(isScreenProctoringEnabled ? Color.green : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                
+                Button(action: {
+                    isGazeTrackingEnabled.toggle()
+                }) {
+                    Text("Track my Gaze")
+                        .padding()
+                        .background(isGazeTrackingEnabled ? Color.green : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
                 }
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            if isScreenProctoringEnabled || isGazeTrackingEnabled {
+                if isScreenProctoringEnabled {
+                    Text("Screen Proctoring On.")
+                        .font(.headline)
+                }
+                
+                if isGazeTrackingEnabled {
+                    Text("Gaze Tracking On.")
+                        .font(.headline)
+                }
+                
+                Button(action: {
+                    // TBD
+                }) {
+                    Text("Start Task")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
             }
         }
+        }
+        .padding()
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
