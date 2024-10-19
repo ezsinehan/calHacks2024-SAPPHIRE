@@ -33,11 +33,17 @@ struct FinishTaskView: View {
     @Binding var isTaskSelected: Bool
     @Binding var task: String
     @ObservedObject var screenProctoring: ScreenProctoring // We need this to stop screen proctoring
+    @ObservedObject var userFeedback = UserFeedback()
+    
 
     var body: some View {
         VStack {
             Text(task)
                 .font(.title2)
+            Text(userFeedback.feedbackMessage)
+                .font(.title)
+                .padding()
+                .foregroundColor(userFeedback.feedbackColor)
             Button(action: {
                 // Stop screen proctoring and gaze tracking if enabled
                 if isScreenProctoringEnabled {
@@ -51,6 +57,7 @@ struct FinishTaskView: View {
                 isTaskStarted = false
                 isTaskSelected = false
                 task = ""
+                
                 
                 print("Task finished!")
             }) {
@@ -76,8 +83,11 @@ struct ContentView: View {
     @State private var isScreenProctoringEnabled: Bool = false
     @State private var isGazeTrackingEnabled: Bool = false
     @State private var isTaskCompleted: Bool = false
+    
     @ObservedObject var screenProctoring = ScreenProctoring()
-
+    @ObservedObject var userFeedback = UserFeedback()
+    
+    
     var body: some View {
         // Check if task is started or not to simulate navigation
         if isTaskStarted {
@@ -140,6 +150,7 @@ struct ContentView: View {
                         Button(action: {
                             isTaskStarted = true
                             if isScreenProctoringEnabled {
+                                screenProctoring.userFeedback = userFeedback
                                 screenProctoring.startScreenProctoring(task: task)
                             } else {
                                 screenProctoring.stopScreenProctoring()
