@@ -86,7 +86,9 @@ struct ContentView: View {
     
     @ObservedObject var screenProctoring = ScreenProctoring()
     @ObservedObject var userFeedback = UserFeedback()
-    
+  
+    let gazeTracker = GazeTracker()
+
     
     var body: some View {
         // Check if task is started or not to simulate navigation
@@ -125,6 +127,15 @@ struct ContentView: View {
                     Text("How Should We Keep You On Task?")
                         .font(.title2)
                         .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+
+                }
+            } else {
+                Text("How Should We Keep You On Task?")
+                    .font(.title2)
+                    .padding()
+
 
                     HStack {
                         Toggle("Proctor My Screen", isOn: $isScreenProctoringEnabled)
@@ -167,6 +178,21 @@ struct ContentView: View {
                                 .shadow(radius: 3)
                         }.buttonStyle(PlainButtonStyle())
                     }
+
+                // Shnoz changed to toggle
+                HStack{
+                    Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
+                        .toggleStyle(CircularToggleStyle())
+                        .onChange(of: isGazeTrackingEnabled){
+                            
+                            gazeTracker.toggleGazeTracking(isGazeTrackingEnabled) //Shnoz made turned camera on and off on toggle
+
+                        }
+                    Text("Track My Gaze")
+                        .font(.headline)
+                        .foregroundColor(isGazeTrackingEnabled ? .green : .gray)
+                }
+                if isScreenProctoringEnabled || isGazeTrackingEnabled {
 
                     // Back button to go back to task input screen
                     Button(action: {

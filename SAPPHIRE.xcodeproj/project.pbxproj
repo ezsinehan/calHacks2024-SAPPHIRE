@@ -29,9 +29,22 @@
 		6A9A16AA2CC3350F0015440B /* SAPPHIREUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SAPPHIREUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6FB8A04D2CC4381400E9A9A0 /* Exceptions for "SAPPHIRE" folder in "SAPPHIRE" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6A9A168C2CC3350E0015440B /* SAPPHIRE */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		6A9A168F2CC3350E0015440B /* SAPPHIRE */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6FB8A04D2CC4381400E9A9A0 /* Exceptions for "SAPPHIRE" folder in "SAPPHIRE" target */,
+			);
 			path = SAPPHIRE;
 			sourceTree = "<group>";
 		};
@@ -399,6 +412,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"SAPPHIRE/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SAPPHIRE/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -425,6 +439,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"SAPPHIRE/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SAPPHIRE/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
