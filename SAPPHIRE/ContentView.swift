@@ -86,7 +86,7 @@ struct ContentView: View {
                         .toggleStyle(CircularToggleStyle())
                         .onChange(of: isScreenProctoringEnabled) {
                             if isScreenProctoringEnabled {
-                                screenProctoring.startScreenProctoring()
+                                screenProctoring.startScreenProctoring(task: task)
                                 
                             } else {
                                 screenProctoring.stopScreenProctoring()
