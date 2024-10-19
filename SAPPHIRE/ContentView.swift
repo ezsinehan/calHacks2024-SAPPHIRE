@@ -13,6 +13,8 @@ struct ContentView: View {
     @State private var isScreenProctoringEnabled: Bool = false
     @State private var isGazeTrackingEnabled: Bool = false
     
+    @ObservedObject var screenProctoring = ScreenProctoring()
+    
     var body: some View {
         VStack {
             if !isTaskSelected {
@@ -41,6 +43,11 @@ struct ContentView: View {
             VStack {
                 Button(action: {
                     isScreenProctoringEnabled.toggle()
+                    if isScreenProctoringEnabled {
+                        screenProctoring.startScreenProctoring()
+                    } else {
+                        screenProctoring.stopScreenProctoring()
+                    }
                 }) {
                     Text("Proctor My Screen")
                         .padding()
