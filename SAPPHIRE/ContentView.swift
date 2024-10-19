@@ -51,9 +51,16 @@ struct ContentView: View {
     @State private var isGazeTrackingEnabled: Bool = false
 
     @ObservedObject var screenProctoring = ScreenProctoring()
+    @ObservedObject var userFeedback = UserFeedback()
+
 
     var body: some View {
         VStack {
+            Text(userFeedback.feedbackMessage)
+                .font(.title)
+                .padding()
+                .foregroundColor(userFeedback.feedbackColor)
+            
             if !isTaskSelected {
                 Text("Enter your task")
                     .font(.title)
@@ -86,6 +93,7 @@ struct ContentView: View {
                         .toggleStyle(CircularToggleStyle())
                         .onChange(of: isScreenProctoringEnabled) {
                             if isScreenProctoringEnabled {
+                                screenProctoring.userFeedback = userFeedback
                                 screenProctoring.startScreenProctoring(task: task)
                                 
                             } else {
@@ -139,6 +147,5 @@ struct ContentView: View {
                                 }.buttonStyle(PlainButtonStyle())
                             }
                         }
-                        
                     }
                 }
