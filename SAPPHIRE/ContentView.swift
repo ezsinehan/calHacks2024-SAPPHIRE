@@ -50,6 +50,7 @@ struct ContentView: View {
     @State private var isGazeTrackingEnabled: Bool = false
 
     @ObservedObject var screenProctoring = ScreenProctoring()
+    let gazeTracker = GazeTracker()
 
     var body: some View {
         VStack {
@@ -69,7 +70,7 @@ struct ContentView: View {
                         .padding()
                         .background(Color.blue)
                         .foregroundColor(.white)
-                        .cornerRadius(10)
+
                 }
             } else {
                 Text("How Should We Keep You On Task?")
@@ -93,10 +94,15 @@ struct ContentView: View {
                         .foregroundColor(isScreenProctoringEnabled ? .green : .gray)
                 }
 
-                // shnoz changed to toggle
+                // Shnoz changed to toggle
                 HStack{
                     Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
                         .toggleStyle(CircularToggleStyle())
+                        .onChange(of: isGazeTrackingEnabled){
+                            
+                            gazeTracker.toggleGazeTracking(isGazeTrackingEnabled) //Shnoz made turned camera on and off on toggle
+
+                        }
                     Text("Track My Gaze")
                         .font(.headline)
                         .foregroundColor(isGazeTrackingEnabled ? .green : .gray)
