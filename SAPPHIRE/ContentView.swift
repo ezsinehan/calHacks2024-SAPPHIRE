@@ -34,7 +34,7 @@ struct FinishTaskView: View {
     @Binding var task: String
     @ObservedObject var screenProctoring: ScreenProctoring // We need this to stop screen proctoring
     @ObservedObject var userFeedback: UserFeedback
-    
+    @ObservedObject var GazeTracker: GazeTracker
 
     var body: some View {
         VStack {
@@ -50,12 +50,18 @@ struct FinishTaskView: View {
                     screenProctoring.stopScreenProctoring()
                     print("stopping screen proctoring")
                 }
+                
+                if isGazeTrackingEnabled {
+                    GazeTracker.stopGazeTracking()
+                    print("stopping gaze tracking")
+                }
                 isScreenProctoringEnabled = false
                 isGazeTrackingEnabled = false
 
                 // Reset the task-related states to go back to the task entry page
                 isTaskStarted = false
                 isTaskSelected = false
+                
                 task = ""
                 
                 
@@ -86,8 +92,9 @@ struct ContentView: View {
     
     @ObservedObject var screenProctoring = ScreenProctoring()
     @ObservedObject var userFeedback = UserFeedback()
+    //@Observe
   
-    let gazeTracker = GazeTracker()
+    @State private var gazeTracker = GazeTracker()
 
     
     var body: some View {
@@ -100,7 +107,8 @@ struct ContentView: View {
                            isTaskSelected: $isTaskSelected,
                            task: $task,
                            screenProctoring: screenProctoring,
-                           userFeedback: userFeedback
+                           userFeedback: userFeedback,
+                           GazeTracker: gazeTracker
             ) // Pass screenProctoring to stop it
         } else {
             VStack {
