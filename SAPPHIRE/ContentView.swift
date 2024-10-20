@@ -33,7 +33,7 @@ struct FinishTaskView: View {
     @Binding var isTaskSelected: Bool
     @Binding var task: String
     @ObservedObject var screenProctoring: ScreenProctoring // We need this to stop screen proctoring
-    @ObservedObject var userFeedback = UserFeedback()
+    @ObservedObject var userFeedback: UserFeedback
     
 
     var body: some View {
@@ -99,7 +99,9 @@ struct ContentView: View {
                            isTaskCompleted: $isTaskCompleted,
                            isTaskSelected: $isTaskSelected,
                            task: $task,
-                           screenProctoring: screenProctoring) // Pass screenProctoring to stop it
+                           screenProctoring: screenProctoring,
+                           userFeedback: userFeedback
+            ) // Pass screenProctoring to stop it
         } else {
             VStack {
                 if !isTaskSelected {
