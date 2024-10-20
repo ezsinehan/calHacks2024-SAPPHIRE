@@ -143,15 +143,16 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         detectFaceLandmarks(in: pixelBuffer)
     }
+    
 
     // Use Vision framework to detect face landmarks (eyes and nose)
     func detectFaceLandmarks(in pixelBuffer: CVPixelBuffer) {
         let faceDetectionRequest = VNDetectFaceLandmarksRequest { (request, error) in
             guard let observations = request.results as? [VNFaceObservation] else { return }
-
+            
             var eyesDetected = false
             var noseDetected = false
-
+            var yaw : Double?
             for faceObservation in observations {
                 if let landmarks = faceObservation.landmarks {
                     // Check for eyes
@@ -163,8 +164,27 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
                     if landmarks.nose != nil {
                         noseDetected = true
                     }
+                    if let detectedYaw = faceObservation.yaw?.doubleValue {
+                                    yaw = detectedYaw
+                                }
+                    
+                    
                 }
+//                checkHeadOrientation(for: faceObservation)
             }
+            
+//            func checkHeadOrientation(for observation : VNFaceObservation){
+//                if let yaw = observation.yaw?.doubleValue {
+//                           if yaw > 0.1 {
+//                               print("User is looking left")
+//                           } else if yaw < -0.1 {
+//                               print("User is looking right")
+//                           } else {
+//                               print("User is looking straight ahead")
+//                           }
+//                       }
+//                
+//            }
 
             // Print results at a throttled rate
 //            if self.canPrint {
@@ -189,13 +209,14 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
 //            }
             if self.canPrint {
                 DispatchQueue.main.async {
-                    if eyesDetected {
-                        print("Eyes detected!")
-                    } else {
+                    if !eyesDetected || (yaw ?? 0) > 0.1 || (yaw ?? 0) < -0.1 {
                         print("Eyes not detected")
                         self.userFeedback.provideGazeFeedback(isOnTask: false)
-                        
+                            } else {
+                            // Eyes detected and user looking straight
+                            print("Eyes detected, looking straight ahead")
                     }
+                    
                 }
 
                 if noseDetected {
