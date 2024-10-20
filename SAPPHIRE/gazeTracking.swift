@@ -8,6 +8,11 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
     let captureSession = AVCaptureSession()
     var videoInput: AVCaptureDeviceInput?
     var videoOutput: AVCaptureVideoDataOutput?
+    @ObservedObject var userFeedback = UserFeedback()
+
+    
+    
+    
     @Published var isTrackingEnabled: Bool = false {
         didSet {
             toggleGazeTracking(isTrackingEnabled)
@@ -162,11 +167,35 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
             }
 
             // Print results at a throttled rate
+//            if self.canPrint {
+//                if eyesDetected {
+//                    print("Eyes detected!")
+//                    self.userFeedback.playAlertSound(isOnTask: true)
+//                    self.userFeedback.provideGazeFeedback(isOnTask: true)
+//
+//                    
+//                } else {
+//                    print("Eyes not detected")
+//                    self.userFeedback.playAlertSound(isOnTask: false)
+//                    self.userFeedback.provideGazeFeedback(isOnTask: false)
+//                }
+//
+//                if noseDetected {
+//                    print("Nose detected!")
+//                } else {
+//                    print("Nose not detected")
+//                }
+//                self.canPrint = false
+//            }
             if self.canPrint {
-                if eyesDetected {
-                    print("Eyes detected!")
-                } else {
-                    print("Eyes not detected")
+                DispatchQueue.main.async {
+                    if eyesDetected {
+                        print("Eyes detected!")
+                    } else {
+                        print("Eyes not detected")
+                        self.userFeedback.provideGazeFeedback(isOnTask: false)
+                        
+                    }
                 }
 
                 if noseDetected {
