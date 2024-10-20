@@ -18,57 +18,65 @@ class geminiAPIManger {
         }
         return nil
     }
-
-    // Function to send recognized text and task text to Gemini API
+    
     func sendTextToGeminiAPI(screenText: String, taskText: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let apiKey = loadAPIKey() else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "API key missing"])))
             return
         }
-
-        let urlString = "https://api.googleapis.com/gemini/v1/compareText" // Replace with correct endpoint
+        
+        let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=\(apiKey)"
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-
+        
         let requestBody: [String: Any] = [
-            "screen_text": screenText,
-            "task_text": taskText
+            "contents": [
+                [
+                    "parts": [
+                        ["text": screenText]
+                    ]
+                ]
+            ]
         ]
-
+        
         do {
             request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
         } catch {
             completion(.failure(error))
             return
         }
-
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 completion(.failure(error))
                 return
             }
-
-            guard let data = data, let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])))
                 return
             }
-
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "No data recieved"])))
+                return
+            }
+            
             if let result = String(data: data, encoding: .utf8) {
                 completion(.success(result))
             } else {
-                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid data format"])))
+                completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Data formatting error"])))
             }
-
         }
-
+        
         task.resume()
     }
 }
+
 
