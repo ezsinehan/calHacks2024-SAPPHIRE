@@ -9,6 +9,10 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
     var videoInput: AVCaptureDeviceInput?
     var videoOutput: AVCaptureVideoDataOutput?
     @ObservedObject var userFeedback = UserFeedback()
+    private var awayTimer: Timer?
+    private var isLookingAway: Bool = false // Track if user is looking away
+    private var awayTime: TimeInterval = 0 // Time spent looking away
+    private let maxAwayTime: TimeInterval = 5 // 5-second threshold
 
     
     
@@ -21,6 +25,8 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
     private var printTimer: Timer?
     private var canPrint: Bool = true
 
+
+
     override init() {
         super.init()
     }
@@ -30,7 +36,9 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
         if enable {
             requestCameraPermission { granted in
                 if granted {
-                    self.startGazeTracking()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        self.startGazeTracking()
+                    }
                 } else {
                     self.showAlert(message: "Camera access is required to enable gaze tracking.")
                     DispatchQueue.main.async {
@@ -99,7 +107,7 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
         }
 
         // Stop the print timer
-        stopPrintTimer()
+//        stopPrintTimer()
         print("Gaze tracking stopped and camera session reset")
     }
 
@@ -151,7 +159,6 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
             guard let observations = request.results as? [VNFaceObservation] else { return }
             
             var eyesDetected = false
-            var noseDetected = false
             var yaw : Double?
             for faceObservation in observations {
                 if let landmarks = faceObservation.landmarks {
@@ -160,10 +167,7 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
                         eyesDetected = true
                     }
 
-                    // Check for nose
-                    if landmarks.nose != nil {
-                        noseDetected = true
-                    }
+                    
                     if let detectedYaw = faceObservation.yaw?.doubleValue {
                                     yaw = detectedYaw
                                 }
@@ -172,31 +176,72 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
                 }
             }
             
+            
+            
 
             if self.canPrint {
                 DispatchQueue.main.async {
+                    // Add a flag to prevent multiple timers from running
+                    var isTimerRunning = false
+                    var userLookingAway = false
                     if !eyesDetected || (yaw ?? 0) > 0.1 || (yaw ?? 0) < -0.1 {
-                        print("Eyes not detected")
-                        if (yaw ?? 0) > 0.1{
-                            print("Looking Left")
+                        // User is looking away
+                        userLookingAway = true
+                        if !isTimerRunning {
+                            isTimerRunning = true
+                            print("Eyes not detected")
+
+                            if (yaw ?? 0) > 0.1 {
+                                print("Looking Left")
+                            }
+                            if (yaw ?? 0) < -0.1 {
+                                print("Looking Right")
+                            }
+
+                            // Start a new timer for "looking away"
+                            if userLookingAway{
+                                self.awayTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                                    
+                                        self.awayTime += 1.0
+                                  
+                                        print("Looking away for \(self.awayTime) seconds...")
+                                    
+                                    
+                                if self.awayTime >= self.maxAwayTime {
+                                    print("User has been looking away for more than 5 seconds")
+                                    self.userFeedback.provideGazeFeedback(isOnTask: false)
+                                    self.awayTimer?.invalidate() // Stop the timer
+                                    self.awayTime = 0 // Reset the away time
+                                }
+                                }
+                            }
                         }
-                        if(yaw ?? 0) < -0.1{
-                            print("Looking Right")
-                        }
-                        self.userFeedback.provideGazeFeedback(isOnTask: false)
-                            } else {
-                            // Eyes detected and user looking straight
-                            print("Eyes detected, looking straight ahead")
+                    } else {
+                        // User is looking back
+                        
+                        print("Eyes detected, looking straight ahead")
+
+                        // Reset and restart the timer immediately
+                        self.awayTimer?.invalidate() // Invalidate the existing timer
+                        self.awayTime = 0 // Reset away time
+
+                        // Restart the timer when the user looks back
                     }
+                        
+                   
                     
                 }
 
-                if noseDetected {
-                    print("Nose detected!")
-                } else {
-                    print("Nose not detected")
-                }
+//                if noseDetected {
+//                    print("Nose detected!")
+//                    self.awayTimer?.invalidate() // Invalidate the existing timer
+//                    self.awayTime = 0 // Reset away time
+//                    
+//                } else {
+//                    print("Nose not detected")
+//                }
                 self.canPrint = false
+
             }
         }
         
@@ -207,6 +252,7 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
             print("Error performing face detection: \(error)")
         }
     }
+    
 
     // Show an alert with the given message
     func showAlert(message: String) {
@@ -222,7 +268,7 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
 
     // Start a timer to control print rate
     private func startPrintTimer() {
-        printTimer = Timer.scheduledTimer(withTimeInterval: 5,  repeats: true) { _ in
+        printTimer = Timer.scheduledTimer(withTimeInterval: 1,  repeats: true) { _ in
             self.canPrint = true
         }
     }
@@ -234,3 +280,4 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
         canPrint = true
     }
 }
+   
