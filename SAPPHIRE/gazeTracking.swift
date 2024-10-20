@@ -170,47 +170,19 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
                     
                     
                 }
-//                checkHeadOrientation(for: faceObservation)
             }
             
-//            func checkHeadOrientation(for observation : VNFaceObservation){
-//                if let yaw = observation.yaw?.doubleValue {
-//                           if yaw > 0.1 {
-//                               print("User is looking left")
-//                           } else if yaw < -0.1 {
-//                               print("User is looking right")
-//                           } else {
-//                               print("User is looking straight ahead")
-//                           }
-//                       }
-//                
-//            }
 
-            // Print results at a throttled rate
-//            if self.canPrint {
-//                if eyesDetected {
-//                    print("Eyes detected!")
-//                    self.userFeedback.playAlertSound(isOnTask: true)
-//                    self.userFeedback.provideGazeFeedback(isOnTask: true)
-//
-//                    
-//                } else {
-//                    print("Eyes not detected")
-//                    self.userFeedback.playAlertSound(isOnTask: false)
-//                    self.userFeedback.provideGazeFeedback(isOnTask: false)
-//                }
-//
-//                if noseDetected {
-//                    print("Nose detected!")
-//                } else {
-//                    print("Nose not detected")
-//                }
-//                self.canPrint = false
-//            }
             if self.canPrint {
                 DispatchQueue.main.async {
                     if !eyesDetected || (yaw ?? 0) > 0.1 || (yaw ?? 0) < -0.1 {
                         print("Eyes not detected")
+                        if (yaw ?? 0) > 0.1{
+                            print("Looking Left")
+                        }
+                        if(yaw ?? 0) < -0.1{
+                            print("Looking Right")
+                        }
                         self.userFeedback.provideGazeFeedback(isOnTask: false)
                             } else {
                             // Eyes detected and user looking straight
@@ -250,7 +222,7 @@ class GazeTracker: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, Obser
 
     // Start a timer to control print rate
     private func startPrintTimer() {
-        printTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
+        printTimer = Timer.scheduledTimer(withTimeInterval: 5,  repeats: true) { _ in
             self.canPrint = true
         }
     }
