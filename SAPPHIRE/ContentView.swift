@@ -33,7 +33,7 @@ struct FinishTaskView: View {
     @Binding var isTaskSelected: Bool
     @Binding var task: String
     @ObservedObject var screenProctoring: ScreenProctoring // We need this to stop screen proctoring
-    @ObservedObject var userFeedback = UserFeedback()
+    @ObservedObject var userFeedback: UserFeedback
     
 
     var body: some View {
@@ -99,7 +99,9 @@ struct ContentView: View {
                            isTaskCompleted: $isTaskCompleted,
                            isTaskSelected: $isTaskSelected,
                            task: $task,
-                           screenProctoring: screenProctoring) // Pass screenProctoring to stop it
+                           screenProctoring: screenProctoring,
+                           userFeedback: userFeedback
+            ) // Pass screenProctoring to stop it
         } else {
             VStack {
                 if !isTaskSelected {
@@ -145,17 +147,13 @@ struct ContentView: View {
                     
                     .padding(5)
                     
-//                    if isScreenProctoringEnabled || isGazeTrackingEnabled {
-//                        
-//                    }
-                    
                     // Shnoz changed to toggle
                     HStack{
                         Toggle("Track My Gaze", isOn: $isGazeTrackingEnabled)
                             .toggleStyle(CircularToggleStyle())
                             .onChange(of: isGazeTrackingEnabled){
                                 
-                                gazeTracker.toggleGazeTracking(isGazeTrackingEnabled) //Shnoz made turned camera on and off on toggle
+                                //gazeTracker.toggleGazeTracking(isGazeTrackingEnabled) //Shnoz made turned camera on and off on toggle
                                 
                             }
                         Text("Track My Gaze")
@@ -165,10 +163,18 @@ struct ContentView: View {
                     if isScreenProctoringEnabled || isGazeTrackingEnabled {
                         Button(action: {
                             isTaskStarted = true
-                            if isScreenProctoringEnabled {
+                            if isScreenProctoringEnabled && isGazeTrackingEnabled {
                                 screenProctoring.userFeedback = userFeedback
                                 screenProctoring.startScreenProctoring(task: task)
-                            } else {
+                                gazeTracker.toggleGazeTracking(isGazeTrackingEnabled) //Shnoz made turned camera on and off on toggle
+
+                            } else if !isScreenProctoringEnabled && isGazeTrackingEnabled {
+                                gazeTracker.toggleGazeTracking(isGazeTrackingEnabled)
+                            } else if isScreenProctoringEnabled && !isGazeTrackingEnabled {
+                                screenProctoring.userFeedback = userFeedback
+                                screenProctoring.startScreenProctoring(task: task)
+                            }
+                            else {
                                 screenProctoring.stopScreenProctoring()
                             }
                             print(task)
