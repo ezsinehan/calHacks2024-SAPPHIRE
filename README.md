@@ -20,22 +20,25 @@ Sapphire keeps you on task by watching your screen and tracking your gaze. If yo
 7) User can go back to app to end task once they finish
 8) Start new task
 
-## TO RUN
 ### To Run
 
-1. **Clone the Repository**  
+1. **Requirements:**
+   - Minimum MacOs: 15
+   - Minimum Xcode: 16
+
+2. **Clone the Repository**  
    ```bash
    git clone https://github.com/ezsinehan/calHacks2024-SAPPHIRE.git
    cd calHacks2024-SAPPHIRE
    ```
 
-2. **Open in Xcode**  
+3. **Open in Xcode**  
    - Open `SAPPHIRE.xcodeproj` in Xcode.
 
-3. **Run the App**  
+4. **Run the App**  
    - Select a target device (Mac or Simulator) and press **Run** (or `Cmd+R`).
    - If issues, clean build(`Cmd+Shift+K`)
 
-4. **Permissions**  
+5. **Permissions**  
    - Allow any permissions that **SAPPHIRE** requests on the first run.
    - *If you modify the code, delete the app from your device and re-run it to re-allow permissions.*
